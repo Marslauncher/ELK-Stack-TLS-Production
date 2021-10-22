@@ -1,0 +1,91 @@
+{
+    "@timestamp": "2017-10-12T08:05:34.853Z",
+    "event": {
+        "dataset": "kibana.stats",
+        "duration": 115000,
+        "module": "kibana"
+    },
+    "kibana": {
+        "elasticsearch": {
+            "cluster": {
+                "id": "9Am6m3bHTJ6YrNg1pmac2Q"
+            }
+        },
+        "stats": {
+            "concurrent_connections": 0,
+            "host": {
+                "name": "0"
+            },
+            "index": "kibana",
+            "name": "kibana",
+            "os": {
+                "distro": "CentOS",
+                "distroRelease": "CentOS-8.2.2004",
+                "load": {
+                    "15m": 2.291015625,
+                    "1m": 2.34912109375,
+                    "5m": 2.49072265625
+                },
+                "memory": {
+                    "free_in_bytes": 12719185920,
+                    "total_in_bytes": 33291984896,
+                    "used_in_bytes": 20572798976
+                },
+                "platform": "linux",
+                "platformRelease": "linux-5.10.14-arch1-1"
+            },
+            "process": {
+                "event_loop_delay": {
+                    "ms": 0.7828890010714531
+                },
+                "memory": {
+                    "heap": {
+                        "size_limit": {
+                            "bytes": 1526909922
+                        },
+                        "total": {
+                            "bytes": 238911488
+                        },
+                        "used": {
+                            "bytes": 169990928
+                        }
+                    },
+                    "resident_set_size": {
+                        "bytes": 354504704
+                    }
+                },
+                "uptime": {
+                    "ms": 986355
+                }
+            },
+            "request": {
+                "disconnects": 0,
+                "total": 4
+            },
+            "response_time": {
+                "avg": {
+                    "ms": 279
+                },
+                "max": {
+                    "ms": 300
+                }
+            },
+            "snapshot": false,
+            "status": "green",
+            "transport_address": "0:5601"
+        }
+    },
+    "metricset": {
+        "name": "stats",
+        "period": 10000
+    },
+    "process": {
+        "pid": 7
+    },
+    "service": {
+        "address": "172.20.0.3:5601",
+        "id": "2076c0f0-fd6e-4ce0-bf04-59541bd3ba0c",
+        "type": "kibana",
+        "version": "7.10.0"
+    }
+}

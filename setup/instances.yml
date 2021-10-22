@@ -1,0 +1,57 @@
+instances:
+  - name: es01
+    dns:
+      - es01
+    ip:
+      - 192.168.17.71
+  - name: es02
+    dns:
+      - es02
+    ip:
+      - 192.168.17.72
+  - name: es03         
+    dns:
+      - es03
+    ip:
+      - 192.168.17.73
+  - name: kibana
+    dns:
+      - kibana
+    ip:
+      - 192.168.17.71
+      - 192.168.17.72
+      - 192.168.17.73
+  - name: logstash
+    dns:
+      - logstash
+    ip:
+      - 192.168.17.71
+      - 192.168.17.72
+      - 192.168.17.73
+  - name: filebeat
+    dns:
+      - filebeat
+    ip:
+      - 192.168.17.71
+      - 192.168.17.72
+      - 192.168.17.73
+  - name: packetbeat
+    dns:
+      - packetbeat
+    ip:
+      - 192.168.17.71
+      - 192.168.17.72
+      - 192.168.17.73
+  - name: metricbeat
+    dns:
+      - metricbeat
+    ip:
+      - 192.168.17.71
+      - 192.168.17.72
+      - 192.168.17.73
+  - name: heartbeat
+    dns:
+      - heartbeat
+      - 192.168.17.71
+      - 192.168.17.72
+      - 192.168.17.73

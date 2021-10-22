@@ -1,0 +1,37 @@
+version: '2.3'
+services:
+  packetbeat:
+    build: /packetbeat
+    depends_on:
+      - proxy_dep
+    working_dir: /packetbeat
+    environment:
+      - ES_HOST=es01
+      - ES_PORT=9200
+      - ES_USER=beats
+      - ES_PASS=testing
+      - KIBANA_HOST=kibana
+      - KIBANA_PORT=5601
+    volumes:
+      - ./packetbeat/packetbeat.yml:/usr/share/packetbeat/packetbeat.yml:ro
+    command: make
+    privileged: true
+    pid: host
+
+  # This is a proxy used to block beats until all services are healthy.
+  # See: https://github.com/docker/compose/issues/4369
+  proxy_dep:
+    image: busybox
+    depends_on:
+      es01: { condition: service_healthy }
+      kibana: { condition: service_healthy }
+
+  es01:
+    extends:
+      file: ../testing/environments/${TESTING_ENVIRONMENT}.yml
+      service: es01
+
+  kibana:
+    extends:
+      file: ../testing/environments/${TESTING_ENVIRONMENT}.yml
+      service: kibana

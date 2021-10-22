@@ -1,0 +1,369 @@
+version: '3.8'
+
+
+secrets:
+  elasticsearch.keystore:
+    file: ./secrets/keystore/elasticsearch.keystore
+  elastic-stack-ca.p12:
+    file: ./secrets/p12certs/metricbeat/metricbeat.p12
+  elastic.ca:
+    file: ./secrets/certs/ca/ca.crt
+  elasticsearch.certificate:
+    file: ./secrets/certs/es01/es01.crt
+  elasticsearch.key:
+    file: ./secrets/certs/es01/es01.key
+  elasticsearch2.certificate:
+    file: ./secrets/certs/es02/es02.crt
+  elasticsearch2.key:
+    file: ./secrets/certs/es02/es02.key
+  elasticsearch3.certificate:
+    file: ./secrets/certs/es03/es03.crt
+  elasticsearch3.key:
+    file: ./secrets/certs/es03/es03.key
+  kibana.certificate:
+    file: ./secrets/certs/kibana/kibana.crt
+  kibana.key:
+    file: ./secrets/certs/kibana/kibana.key
+  logstash.certificate:
+    file: ./secrets/certs/logstash/logstash.crt
+  logstash.key:
+    file: ./secrets/certs/logstash/logstash.key
+  filebeat.certificate:
+    file: ./secrets/certs/filebeat/filebeat.crt
+  filebeat.key:
+    file: ./secrets/certs/filebeat/filebeat.key
+  packetbeat.certificate:
+    file: ./secrets/certs/packetbeat/packetbeat.crt
+  packetbeat.key:
+    file: ./secrets/certs/packetbeat/packetbeat.key
+  metricbeat.certificate:
+    file: ./secrets/certs/metricbeat/metricbeat.crt
+  metricbeat.key:
+    file: ./secrets/certs/metricbeat/metricbeat.key
+  elastic-agent.certificate:
+    file: ./secrets/certs/elastic-agent/elastic-agent.crt
+  elastic-agent.key:
+    file: ./secrets/certs/elastic-agent/elastic-agent.key
+
+
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: ${ELK_VERSION}
+    restart: unless-stopped
+    environment:
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      ELASTIC_CLUSTER_NAME: ${ELASTIC_CLUSTER_NAME}
+      ELASTIC_NODE_NAME: es01
+      ELASTIC_INIT_MASTER_NODE: es01,es02,es03 
+      ELASTIC_DISCOVERY_SEEDS: es02,es03
+      ES_JAVA_OPTS: -Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP} -Des.enforce.bootstrap.checks=true
+      bootstrap.memory_lock: "true"
+    networks:
+      - ingress
+    volumes:
+      - ./es01:/usr/share/elasticsearch/data
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elasticsearch/config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
+    secrets:
+      - source: elasticsearch.keystore
+        target: /usr/share/elasticsearch/config/elasticsearch.keystore
+      - source: elastic.ca
+        target: /usr/share/elasticsearch/config/certs/ca.crt
+      - source: elasticsearch.certificate
+        target: /usr/share/elasticsearch/config/certs/elasticsearch.crt
+      - source: elasticsearch.key
+        target: /usr/share/elasticsearch/config/certs/elasticsearch.key
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 200000
+        hard: 200000
+    deploy:
+      mode: replicated
+      replicas: 2
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1      
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: ${ELK_VERSION}
+    restart: unless-stopped
+    environment:
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      ELASTIC_CLUSTER_NAME: ${ELASTIC_CLUSTER_NAME}
+      ELASTIC_NODE_NAME: es02
+      ELASTIC_INIT_MASTER_NODE: es01,es02,es03  
+      ELASTIC_DISCOVERY_SEEDS: es01,es03
+      ES_JAVA_OPTS: -Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP} -Des.enforce.bootstrap.checks=true
+      bootstrap.memory_lock: "true"
+    networks:
+      - ingress
+    volumes:
+      - ./es02:/usr/share/elasticsearch/data
+      - ./elasticsearch/config/elasticsearch2.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elasticsearch/config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
+    secrets:
+      - source: elasticsearch.keystore
+        target: /usr/share/elasticsearch/config/elasticsearch.keystore
+      - source: elastic.ca
+        target: /usr/share/elasticsearch/config/certs/ca.crt
+      - source: elasticsearch2.certificate
+        target: /usr/share/elasticsearch/config/certs/elasticsearch.crt
+      - source: elasticsearch2.key
+        target: /usr/share/elasticsearch/config/certs/elasticsearch.key
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 200000
+        hard: 200000
+    deploy:
+      mode: replicated
+      replicas: 2
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: ${ELK_VERSION}
+    restart: unless-stopped
+    environment:
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      ELASTIC_CLUSTER_NAME: ${ELASTIC_CLUSTER_NAME}
+      ELASTIC_NODE_NAME: es03
+      ELASTIC_INIT_MASTER_NODE: es01,es02,es03  
+      ELASTIC_DISCOVERY_SEEDS: es01,es02
+      ES_JAVA_OPTS: -Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP} -Des.enforce.bootstrap.checks=true
+      bootstrap.memory_lock: "true"
+    networks:
+      - ingress
+    volumes:
+      - ./es03:/usr/share/elasticsearch/data
+      - ./elasticsearch/config/elasticsearch3.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elasticsearch/config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
+    secrets:
+      - source: elasticsearch.keystore
+        target: /usr/share/elasticsearch/config/elasticsearch.keystore
+      - source: elastic.ca
+        target: /usr/share/elasticsearch/config/certs/ca.crt
+      - source: elasticsearch3.certificate
+        target: /usr/share/elasticsearch/config/certs/elasticsearch.crt
+      - source: elasticsearch3.key
+        target: /usr/share/elasticsearch/config/certs/elasticsearch.key
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 200000
+        hard: 200000
+    deploy:
+      mode: replicated
+      replicas: 2
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.15.1
+    build:
+      context: kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    restart: unless-stopped
+    volumes:
+      - ./kibana/config:/usr/share/kibana/config:ro
+    environment:
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      ELASTICSEARCH_HOST_PORT: ${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}
+    networks:
+      - ingress
+    secrets:
+      - source: elastic.ca
+        target: /usr/share/kibana/ca.crt
+      - source: kibana.certificate
+        target: /usr/share/kibana/kibana.crt
+      - source: kibana.key
+        target: /usr/share/kibana/kibana.key
+    ports:
+      - "5601:5601"
+    deploy:
+      mode: global
+#      replicas: 1
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.15.1
+    build:
+      context: logstash/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    restart: unless-stopped
+    volumes:
+      - ./logstash/config:/usr/share/logstash/config:ro
+      - ./logstash/pipeline/main.conf:/usr/share/logstash/pipeline/main.conf:ro
+      - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    ports:
+      - "12201:12201/udp"
+      - "5044:5044"
+      - "5000:5000"
+      - "9600:9600"
+    expose: 
+      - "5044"
+    environment:
+      LS_JAVA_OPTS: -Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP}
+    networks:
+      - ingress
+    depends_on:
+      - es01
+#      - es02
+#      - es03
+    deploy:
+      mode: global
+#      replicas: 1
+#      restart_policy:
+#        condition: on-failure
+#        delay: 1s
+#        max_attempts: 10
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.15.1
+#    container_name: filebeat
+    hostname: filebeat
+    build:
+      context: filebeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    restart: unless-stopped
+    volumes: 
+      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/config/filebeat.yml:ro
+    environment:
+      CONFIG_DIR: /usr/share/filebeat/config
+      LS_JAVA_OPTS: -Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP}
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+    secrets:
+      - source: elastic.ca
+        target: /usr/share/filebeat/ca.crt
+      - source: filebeat.certificate
+        target: /usr/share/filebeat/filebeat.crt
+      - source: filebeat.key
+        target: /usr/share/filebeat/filebeat.key
+    ports:
+      - "9000:9000" 
+    networks:
+      - ingress
+    depends_on: 
+      - logstash
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"  
+
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.15.1
+    build:
+      context: metricbeat/
+      args:
+          elk_version: ${ELK_VERSION}
+    user: root # To read the docker socket
+    volumes:
+      - type: bind
+        source: ./metricbeat/config/metricbeat.docker.yml
+        target: /usr/share/metricbeat/metricbeat.yml
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    secrets:
+      - source: elastic-stack-ca.p12
+        target: /etc/pki/ca-trust/source/anchors/elastic-stack-ca.p12
+      - source: elastic.ca
+        target: /etc/pki/ca-trust/source/anchors/ca.crt
+      - source: metricbeat.certificate
+        target: /usr/share/metricbeat/metricbeat.crt
+      - source: metricbeat.key
+        target: /usr/share/metricbeat/metricbeat.key
+    networks:
+      - ingress
+    restart: on-failure
+    depends_on:
+      - es01
+      - es02
+      - es03
+      - kibana
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+
+
+  heartbeat:
+    image: docker.elastic.co/beats/heartbeat:7.15.1
+    build:
+      context: heartbeat/
+      args:
+        elk_version: ${ELK_VERSION}
+    volumes:
+      - type: bind
+        source: ./heartbeat/config/heartbeat.docker.yml
+        target: /usr/share/heartbeat/heartbeat.yml
+        read_only: true
+    networks:
+    - ingress
+    command: heartbeat -e --strict.perms=false 
+    restart: on-failure
+    depends_on:
+    - es01
+    - kibana
+    deploy:
+      mode: global
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+
+
+networks:
+  ingress:
+    driver: overlay

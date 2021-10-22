@@ -1,0 +1,59 @@
+filebeat.inputs:
+  - type: log
+    enabled: false
+    paths:
+      - /var/log/*.log
+
+  - type: filestream
+    enabled: false
+    paths:
+      - /var/log/*.log
+
+filebeat.config.modules:
+  path: /usr/share/filebeat/modules.d/*.yml
+  reload.enabled: true
+
+path.home: /usr/share/filebeat
+path.config: /etc/filebeat
+path.data: /var/lib/filebeat
+path.logs: /var/log/
+system.hostfs: /mount/rootfs
+
+setup.template.settings:
+  index.number_of_shards: 1
+  setup.kibana:
+  host: "https://kibana:5601"
+  username: "elastic"
+  password: "changeme"
+  ssl.enabled: true
+  ssl.certificate_authorities: "/secrets/certs/ca/ca.crt"
+  ssl.certificate: "/secrets/certs/kibana/kibana.crt"
+  ssl.key: "/secrets/certs/kibana/kibana.key"
+
+output.elasticsearch:
+  hosts: ["es01:9200"]
+  protocol: "https"
+  enabled: true
+  ssl.enabled: true
+  username: "elastic"
+  password: "changeme"
+
+filebeat.modules:
+- module: nginx
+- module: mysql
+- module: system
+- module: logstash
+- module: kibana
+- module: haproxy
+- module: elasticsearch
+- module: traefik
+
+
+#  ssl.certificate_authorities:
+#    ["/secrets/certs/ca/ca.crt"]
+#  ssl.certificate: "/secrets/certs/es01/es01.crt"
+#  ssl.key: "/secrets/certs/es01/es01.key"
+
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded

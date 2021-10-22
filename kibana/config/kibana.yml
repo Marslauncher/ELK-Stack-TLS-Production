@@ -1,0 +1,34 @@
+---
+## Default Kibana configuration from Kibana base image.
+## https://github.com/elastic/kibana/blob/master/src/dev/build/tasks/os_packages/docker_generator/templates/kibana_yml.template.js
+#
+server.name: kibana
+server.host: "0.0.0.0"
+
+# Elasticsearch Connection
+elasticsearch.hosts: ["https://es01:9200","https://es02:9200","https://es03:9300"]
+
+# SSL settings
+server.ssl.enabled: true
+server.ssl.certificate: /usr/share/kibana/kibana.crt
+server.ssl.key: /usr/share/kibana/kibana.key
+server.ssl.certificateAuthorities: [ "/usr/share/kibana/ca.crt" ]
+xpack.security.encryptionKey: C1tHnfrlfxSPxPlQ8BlgPB5qMNRtg5V5
+xpack.encryptedSavedObjects.encryptionKey: D12GTfrlfxSPxPlGRBlgPB5qM5GOPDV5
+xpack.reporting.encryptionKey: RSCueeHKzrqzOVTJhkjt17EMnzM96LlN
+
+## X-Pack security credentials
+elasticsearch.username: ${ELASTIC_USERNAME}
+elasticsearch.password: ${ELASTIC_PASSWORD}
+elasticsearch.ssl.certificateAuthorities: [ "/usr/share/kibana/ca.crt" ]
+
+
+## Misc
+elasticsearch.requestTimeout: 90000
+
+
+
+## ElastAlert Plugin
+#elastalert-kibana-plugin.serverHost: elastalert
+#elastalert-kibana-plugin.serverPort: 3030
+
